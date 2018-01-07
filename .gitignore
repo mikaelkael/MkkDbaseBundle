@@ -1,0 +1,6 @@
+composer.lock
+vendor/*
+phpunit.xml
+Tests/Fixtures/cache
+Tests/Fixtures/cache
+Tests/Fixtures/test.dbf

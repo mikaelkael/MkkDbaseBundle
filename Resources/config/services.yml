@@ -1,0 +1,4 @@
+services:
+    mkk_dbase.dbase:
+        class: Mkk\DbaseBundle\Component\Dbase
+        public: true
