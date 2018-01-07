@@ -48,6 +48,17 @@ class DbaseTest extends TestCase
         $this->assertEquals(200, $dbase->getNumRecords());
     }
 
+    /**
+     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
+     */
+    public function testNumRecordsIfDatabaseClosed()
+    {
+        $dbase = new Dbase();
+        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $dbase->close();
+        $dbase->getNumRecords();
+    }
+
     public function testGetRecord()
     {
         $dbase = new Dbase();
@@ -57,6 +68,28 @@ class DbaseTest extends TestCase
         $this->assertEquals(5, $data['id']);
         $this->assertEquals('foo5', $data['name']);
         $this->assertEquals('20100105', $data['date']->format('Ymd'));
+    }
+
+    /**
+     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
+     */
+    public function testGetRecordIfDatabaseClosed()
+    {
+        $dbase = new Dbase();
+        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $dbase->close();
+        $dbase->find(1);
+    }
+
+    /**
+     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
+     */
+    public function testAddRecordIfDatabaseClosed()
+    {
+        $dbase = new Dbase();
+        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $dbase->close();
+        $dbase->addRecord(array());
     }
 
     public function testGetAllRecords()
@@ -145,5 +178,51 @@ class DbaseTest extends TestCase
         $this->assertEquals(123, $data['id']);
         $this->assertEquals(true, $data['bool']);
         $this->assertEquals(date('Ymd'), $data['date']->format('Ymd'));
+    }
+
+    /**
+     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
+     */
+    public function testCreateExists()
+    {
+        touch(__DIR__ . '/../Fixtures/test.dbf');
+        $dbase      = new Dbase();
+        $dbase->create(array('path' => __DIR__ . '/../Fixtures/test.dbf'));
+    }
+
+    /**
+     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
+     */
+    public function testCreateNoPath()
+    {
+        $dbase      = new Dbase();
+        $dbase->create(array('path' => null));
+    }
+
+    public function testArrayAccess()
+    {
+        $dbase = new Dbase();
+        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $data = $dbase->find(4);
+        $this->assertTrue(isset($data['id']));
+        $this->assertEquals(4, $data['id']);
+        $this->assertEquals('foo4', $data['name']);
+        unset($data['name']);
+        $this->assertFalse(isset($data['name']));
+        $data['id'] = 123;
+        $this->assertEquals(123, $data['id']);
+    }
+
+    public function testDeleteRecord()
+    {
+        copy(__DIR__ . '/../Fixtures/dbase.dbf', __DIR__ . '/../Fixtures/test.dbf');
+        $dbase = new Dbase();
+        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/test.dbf', 'mode' => Dbase::DBASE_MODE_READ_WRITE));
+        $this->assertEquals(200, $dbase->getNumRecords());
+        $dbase->deleteRecord(4);
+        $dbase->close(true);
+
+        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/test.dbf'));
+        $this->assertEquals(199, $dbase->getNumRecords());
     }
 }

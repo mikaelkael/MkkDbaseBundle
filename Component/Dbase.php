@@ -121,7 +121,22 @@ class Dbase
             throw new DbaseException('No open database');
         }
         dbase_add_record($this->connection, $data);
+        return $this;
     }
+
+    /**
+     * @param array $data
+     * @throws DbaseException
+     */
+    public function deleteRecord($numRecord)
+    {
+        if (!$this->connection) {
+            throw new DbaseException('No open database');
+        }
+        dbase_delete_record($this->connection, $numRecord);
+        return $this;
+    }
+
 
     /**
      * @return DbaseRecord[]

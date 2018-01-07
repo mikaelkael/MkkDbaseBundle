@@ -2,7 +2,7 @@
 
 namespace Mkk\DbaseBundle\Component;
 
-class DbaseRecord
+class DbaseRecord implements \ArrayAccess
 {
     protected $markAsDeleted = false;
     protected $originalData = array();
@@ -15,7 +15,7 @@ class DbaseRecord
      */
     public function __construct(DbaseHeader $header, array $data)
     {
-        $this->markAsDeleted = (bool) $data['deleted'];
+        $this->markAsDeleted = (bool)$data['deleted'];
         unset($data['deleted']);
         $this->originalData = $data;
         $this->prepareData($header);
@@ -36,12 +36,32 @@ class DbaseRecord
                     $this->data[strtolower($headerInfo['name'])] = new \DateTime($data);
                     break;
                 case 'boolean':
-                    $this->data[strtolower($headerInfo['name'])] = (bool) $data;
+                    $this->data[strtolower($headerInfo['name'])] = (bool)$data;
                     break;
                 default:
                     $this->data[strtolower($headerInfo['name'])] = $data;
             }
         }
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        $this->data[$offset] = $value;
+    }
+
+    public function offsetExists($offset)
+    {
+        return isset($this->data[$offset]);
+    }
+
+    public function offsetUnset($offset)
+    {
+        unset($this->data[$offset]);
+    }
+
+    public function offsetGet($offset)
+    {
+        return isset($this->data[$offset]) ? $this->data[$offset] : null;
     }
 
     /**
