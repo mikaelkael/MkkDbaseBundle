@@ -23,6 +23,8 @@ matrix:
   fast_finish: true
 
 before_script:
+  - if [[ $TRAVIS_PHP_VERSION = 5.* ]]; then pecl install dbase; fi;
+  - if [[ $TRAVIS_PHP_VERSION = 7.* ]]; then pecl install dbase-7.0.0beta1; fi;
   - if [ "$SYMFONY_VERSION" != "" ]; then composer require --no-update "symfony/framework-bundle:${SYMFONY_VERSION}"; fi;
   - if [ "$DEPENDENCIES" = "dev" ]; then perl -pi -e 's/^}$/,"minimum-stability":"dev"}/' composer.json; fi;
   - composer install --dev
