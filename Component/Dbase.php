@@ -6,7 +6,7 @@ class Dbase
 {
 
     const DBASE_MODE_READ = 0;
-    const DBASE_MODE_WRITE = 1;
+    const DBASE_MODE_WRITE = 1; // must not be used, see: https://www.php.net/manual/fr/function.dbase-open.php#refsect1-function.dbase-open-parameters
     const DBASE_MODE_READ_WRITE = 2;
 
     protected $header = null;
@@ -63,7 +63,10 @@ class Dbase
         if (file_exists(realpath($params['path']))) {
             throw new DbaseException('Database already exists in ' . $params['path']);
         }
-        $this->connection = dbase_create($params['path'], $params['fields']);
+        if (!array_key_exists('type', $params) || $params['type'] == null) {
+            $params['type'] = DBASE_TYPE_DBASE;
+        }
+        $this->connection = dbase_create($params['path'], $params['fields'], $params['type']);
         if (!$this->connection) {
             throw new DbaseException('Unable to create database ' . $params['path']);
         }
@@ -136,7 +139,6 @@ class Dbase
         dbase_delete_record($this->connection, $numRecord);
         return $this;
     }
-
 
     /**
      * @return DbaseRecord[]

@@ -139,11 +139,15 @@ class DbaseTest extends TestCase
     public function testCreate()
     {
         $dbase = new Dbase();
-        $dbase->create(array('path' => __DIR__ . '/../Fixtures/test.dbf', 'fields' => array(
-            array('ID', 'N', 11, 0),
-            array('BOOL', 'L'),
-            array('DATE', 'D')
-        )));
+        $dbase->create(array(
+            'path' => __DIR__ . '/../Fixtures/test.dbf',
+            'fields' => array(
+                array('ID', 'N', 11, 0),
+                array('BOOL', 'L'),
+                array('DATE', 'D')
+            ),
+            'type' => DBASE_TYPE_FOXPRO
+        ));
         $dbase->addRecord(array(123, 'Y', date('Ymd')));
         $dbase->close();
 
