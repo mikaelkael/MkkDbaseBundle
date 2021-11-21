@@ -4,31 +4,19 @@ namespace Mkk\DbaseBundle\Component;
 
 class DbaseHeader
 {
+    protected $headers = [];
 
-    protected $headers = array();
-
-    /**
-     * DbaseHeader constructor.
-     * @param array $headerInfo
-     */
     public function __construct(array $headerInfo)
     {
         $this->headers = $headerInfo;
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->headers;
     }
 
-    /**
-     * @param $columnNumber
-     * @return array
-     */
-    public function getColumn($columnNumber)
+    public function getColumn($columnNumber): array
     {
         return $this->headers[$columnNumber];
     }

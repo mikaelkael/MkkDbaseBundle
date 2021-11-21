@@ -1,232 +1,233 @@
 <?php
 
-namespace Mkk\DbaseBundle\Tests;
+namespace Mkk\DbaseBundle\Tests\Component;
 
 use Mkk\DbaseBundle\Component\Dbase;
+use Mkk\DbaseBundle\Component\DbaseException;
 use PHPUnit\Framework\TestCase;
 
-class DbaseTest extends TestCase
+/**
+ * @internal
+ * @coversNothing
+ */
+final class DbaseTest extends TestCase
 {
-
-    public function setUp()
+    protected function setUp(): void
     {
-        if (file_exists(__DIR__ . '/../Fixtures/test.dbf')) {
-            unlink(__DIR__ . '/../Fixtures/test.dbf');
+        if (file_exists(__DIR__.'/../Fixtures/test.dbf')) {
+            unlink(__DIR__.'/../Fixtures/test.dbf');
         }
         parent::setUp();
     }
 
-    public function testConnect()
-    {
-        $dbase      = new Dbase();
-        $connection = $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
-        $this->assertNotFalse($connection);
-    }
-
-    /**
-     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
-     */
-    public function testConnectNotExists()
-    {
-        $dbase      = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/notexists.dbf'));
-    }
-
-    /**
-     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
-     */
-    public function testConnectNoPath()
-    {
-        $dbase      = new Dbase();
-        $dbase->connect(array('path' => null));
-    }
-
-    public function testNumRecords()
+    public function testConnect(): void
     {
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
-        $this->assertEquals(200, $dbase->getNumRecords());
+        $connection = $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
+        static::assertNotFalse($connection);
     }
 
-    /**
-     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
-     */
-    public function testNumRecordsIfDatabaseClosed()
+    public function testConnectNotExists(): void
     {
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $this->expectException(DbaseException::class);
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/notexists.dbf']);
+    }
+
+    public function testConnectNoPath(): void
+    {
+        $dbase = new Dbase();
+        $this->expectException(DbaseException::class);
+        $dbase->connect(['path' => null]);
+    }
+
+    public function testNumRecords(): void
+    {
+        $dbase = new Dbase();
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
+        static::assertSame(200, $dbase->getNumRecords());
+    }
+
+    public function testNumRecordsIfDatabaseClosed(): void
+    {
+        $dbase = new Dbase();
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
         $dbase->close();
+        $this->expectException(DbaseException::class);
         $dbase->getNumRecords();
     }
 
-    public function testGetRecord()
+    public function testGetRecord(): void
     {
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
         $data = $dbase->find(5)->toArray();
-        $this->assertCount(3, $data);
-        $this->assertEquals(5, $data['id']);
-        $this->assertEquals('foo5', $data['name']);
-        $this->assertEquals('20100105', $data['date']->format('Ymd'));
+        static::assertCount(3, $data);
+        static::assertSame(5, $data['id']);
+        static::assertSame('foo5', $data['name']);
+        static::assertSame('20100105', $data['date']->format('Ymd'));
     }
 
-    /**
-     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
-     */
-    public function testGetRecordIfDatabaseClosed()
+    public function testGetRecordIfDatabaseClosed(): void
     {
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
         $dbase->close();
+        $this->expectException(DbaseException::class);
         $dbase->find(1);
     }
 
-    /**
-     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
-     */
-    public function testAddRecordIfDatabaseClosed()
+    public function testAddRecordIfDatabaseClosed(): void
     {
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
         $dbase->close();
-        $dbase->addRecord(array());
+        $this->expectException(DbaseException::class);
+        $dbase->addRecord([]);
     }
 
-    public function testGetAllRecords()
+    public function testGetAllRecords(): void
     {
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
         $data = $dbase->findAll();
-        $this->assertCount(200, $data);
-        $this->assertEquals(1, $data[1]->toArray()['id']);
-        $this->assertEquals('foo1', $data[1]->toArray()['name']);
-        $this->assertEquals('20100101', $data[1]->toArray()['date']->format('Ymd'));
-        $this->assertEquals(200, $data[200]->toArray()['id']);
-        $this->assertEquals('foo200', $data[200]->toArray()['name']);
-        $this->assertEquals('20100719', $data[200]->toArray()['date']->format('Ymd'));
+        static::assertCount(200, $data);
+        static::assertSame(1, $data[1]->toArray()['id']);
+        static::assertSame('foo1', $data[1]->toArray()['name']);
+        static::assertSame('20100101', $data[1]->toArray()['date']->format('Ymd'));
+        static::assertSame(200, $data[200]->toArray()['id']);
+        static::assertSame('foo200', $data[200]->toArray()['name']);
+        static::assertSame('20100719', $data[200]->toArray()['date']->format('Ymd'));
     }
 
-    public function testGetHeader()
+    public function testGetHeader(): void
     {
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
-        $this->assertSame(array(array(
-            'name'      => 'ID',
-            'type'      => 'number',
-            'length'    => 11,
-            'precision' => 0,
-            'format'    => '%11s',
-            'offset'    => 1,
-        ),
-            array(
-                'name'      => 'NAME',
-                'type'      => 'character',
-                'length'    => 11,
-                'precision' => 0,
-                'format'    => '%-11s',
-                'offset'    => 12,
-            ),
-            array(
-                'name'      => 'DATE',
-                'type'      => 'date',
-                'length'    => 8,
-                'precision' => 0,
-                'format'    => '%8s',
-                'offset'    => 23,
-            )), $dbase->getHeader()->toArray());
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
+        static::assertSame(
+            [
+                [
+                    'name' => 'ID',
+                    'type' => 'number',
+                    'length' => 11,
+                    'precision' => 0,
+                    'format' => '%11s',
+                    'offset' => 1,
+                ],
+                [
+                    'name' => 'NAME',
+                    'type' => 'character',
+                    'length' => 11,
+                    'precision' => 0,
+                    'format' => '%-11s',
+                    'offset' => 12,
+                ],
+                [
+                    'name' => 'DATE',
+                    'type' => 'date',
+                    'length' => 8,
+                    'precision' => 0,
+                    'format' => '%8s',
+                    'offset' => 23,
+                ],
+            ],
+            $dbase->getHeader()->toArray()
+        );
     }
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $dbase = new Dbase();
-        $dbase->create(array(
-            'path' => __DIR__ . '/../Fixtures/test.dbf',
-            'fields' => array(
-                array('ID', 'N', 11, 0),
-                array('BOOL', 'L'),
-                array('DATE', 'D')
-            ),
-            'type' => DBASE_TYPE_FOXPRO
-        ));
-        $dbase->addRecord(array(123, 'Y', date('Ymd')));
+        $dbase->create(
+            [
+                'path' => __DIR__.'/../Fixtures/test.dbf',
+                'fields' => [
+                    ['ID', 'N', 11, 0],
+                    ['BOOL', 'L'],
+                    ['DATE', 'D'],
+                ],
+                'type' => DBASE_TYPE_FOXPRO,
+            ]
+        );
+        $dbase->addRecord([123, 'Y', date('Ymd')]);
         $dbase->close();
 
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/test.dbf'));
-        $this->assertSame(array(
-            array(
-                'name'      => 'ID',
-                'type'      => 'number',
-                'length'    => 11,
-                'precision' => 0,
-                'format'    => '%11s',
-                'offset'    => 1,
-            ),
-            array(
-                'name'      => 'BOOL',
-                'type'      => 'boolean',
-                'length'    => 1,
-                'precision' => 0,
-                'format'    => '%1s',
-                'offset'    => 12,
-            ),
-            array(
-                'name'      => 'DATE',
-                'type'      => 'date',
-                'length'    => 8,
-                'precision' => 0,
-                'format'    => '%8s',
-                'offset'    => 13,
-            )), $dbase->getHeader()->toArray());
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/test.dbf']);
+        static::assertSame(
+            [
+                [
+                    'name' => 'ID',
+                    'type' => 'number',
+                    'length' => 11,
+                    'precision' => 0,
+                    'format' => '%11s',
+                    'offset' => 1,
+                ],
+                [
+                    'name' => 'BOOL',
+                    'type' => 'boolean',
+                    'length' => 1,
+                    'precision' => 0,
+                    'format' => '%1s',
+                    'offset' => 12,
+                ],
+                [
+                    'name' => 'DATE',
+                    'type' => 'date',
+                    'length' => 8,
+                    'precision' => 0,
+                    'format' => '%8s',
+                    'offset' => 13,
+                ],
+            ],
+            $dbase->getHeader()->toArray()
+        );
         $data = $dbase->find(1)->toArray();
-        $this->assertCount(3, $data);
-        $this->assertEquals(123, $data['id']);
-        $this->assertEquals(true, $data['bool']);
-        $this->assertEquals(date('Ymd'), $data['date']->format('Ymd'));
+        static::assertCount(3, $data);
+        static::assertSame(123, $data['id']);
+        static::assertTrue($data['bool']);
+        static::assertSame(date('Ymd'), $data['date']->format('Ymd'));
     }
 
-    /**
-     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
-     */
-    public function testCreateExists()
+    public function testCreateExists(): void
     {
-        touch(__DIR__ . '/../Fixtures/test.dbf');
-        $dbase      = new Dbase();
-        $dbase->create(array('path' => __DIR__ . '/../Fixtures/test.dbf'));
+        touch(__DIR__.'/../Fixtures/test.dbf');
+        $dbase = new Dbase();
+        $this->expectException(DbaseException::class);
+        $dbase->create(['path' => __DIR__.'/../Fixtures/test.dbf']);
     }
 
-    /**
-     * @expectedException \Mkk\DbaseBundle\Component\DbaseException
-     */
-    public function testCreateNoPath()
-    {
-        $dbase      = new Dbase();
-        $dbase->create(array('path' => null));
-    }
-
-    public function testArrayAccess()
+    public function testCreateNoPath(): void
     {
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/dbase.dbf'));
+        $this->expectException(DbaseException::class);
+        $dbase->create(['path' => null]);
+    }
+
+    public function testArrayAccess(): void
+    {
+        $dbase = new Dbase();
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/dbase.dbf']);
         $data = $dbase->find(4);
-        $this->assertTrue(isset($data['id']));
-        $this->assertEquals(4, $data['id']);
-        $this->assertEquals('foo4', $data['name']);
+        static::assertTrue(isset($data['id']));
+        static::assertSame(4, $data['id']);
+        static::assertSame('foo4', $data['name']);
         unset($data['name']);
-        $this->assertFalse(isset($data['name']));
+        static::assertFalse(isset($data['name']));
         $data['id'] = 123;
-        $this->assertEquals(123, $data['id']);
+        static::assertSame(123, $data['id']);
     }
 
-    public function testDeleteRecord()
+    public function testDeleteRecord(): void
     {
-        copy(__DIR__ . '/../Fixtures/dbase.dbf', __DIR__ . '/../Fixtures/test.dbf');
+        copy(__DIR__.'/../Fixtures/dbase.dbf', __DIR__.'/../Fixtures/test.dbf');
         $dbase = new Dbase();
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/test.dbf', 'mode' => Dbase::DBASE_MODE_READ_WRITE));
-        $this->assertEquals(200, $dbase->getNumRecords());
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/test.dbf', 'mode' => Dbase::DBASE_MODE_READ_WRITE]);
+        static::assertSame(200, $dbase->getNumRecords());
         $dbase->deleteRecord(4);
         $dbase->close(true);
 
-        $dbase->connect(array('path' => __DIR__ . '/../Fixtures/test.dbf'));
-        $this->assertEquals(199, $dbase->getNumRecords());
+        $dbase->connect(['path' => __DIR__.'/../Fixtures/test.dbf']);
+        static::assertSame(199, $dbase->getNumRecords());
     }
 }

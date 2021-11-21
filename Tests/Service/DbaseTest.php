@@ -5,9 +5,12 @@ namespace Mkk\DbaseBundle\Tests\Service;
 use Mkk\DbaseBundle\Component\Dbase;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class DbaseTest extends WebTestCase
+/**
+ * @internal
+ * @coversNothing
+ */
+final class DbaseTest extends WebTestCase
 {
-
     public function testService()
     {
         $kernel = static::createKernel();
@@ -15,6 +18,6 @@ class DbaseTest extends WebTestCase
         $container = $kernel->getContainer();
 
         $service = $container->get('mkk_dbase.dbase');
-        $this->assertTrue($service instanceof Dbase);
+        static::assertTrue($service instanceof Dbase);
     }
 }

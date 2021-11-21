@@ -2,6 +2,8 @@
 
 namespace Mkk\DbaseBundle\Tests\Fixtures;
 
+use Mkk\DbaseBundle\MkkDbaseBundle;
+use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\HttpKernel\Kernel;
 
@@ -12,10 +14,7 @@ class TestKernel extends Kernel
 {
     public function registerBundles()
     {
-        return array(
-            new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
-            new \Mkk\DbaseBundle\MkkDbaseBundle()
-        );
+        return [new FrameworkBundle(), new MkkDbaseBundle()];
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader)
